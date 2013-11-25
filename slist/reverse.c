@@ -24,14 +24,14 @@ struct list *list_reverse(struct list *head)
 
 struct list *list_reverse_inplace(struct list *head)
 {
-    struct list *new = NULL;
+    struct list *prev = NULL;
     struct list *cur = NULL;
     
     while(head)
     {
         cur = head;
-        cur->next = new;
-        new = cur;
+        cur->next = prev;
+        prev = cur;
         head = head->next;
     }
 

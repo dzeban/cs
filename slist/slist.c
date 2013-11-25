@@ -54,19 +54,23 @@ void list_remove(int i, struct list **head)
     struct list *prev = NULL;
     while(cur->next)
     {
-        if( cur->n == i )
+        if( cur->n == i ) // Found element to remove
         {
             if( prev )
             {
+                // Make previous pointer around deleted element
                 prev->next = cur->next;
             }
             else
             {
+                // prev == NULL means we removing head, 
+                // so shift head to next element.
                 *head = cur->next;
             }
             free(cur);
         }
 
+        // Iterating...
         prev = cur;
         cur = cur->next;
     }
@@ -80,7 +84,7 @@ void list_remove_pp(int i, struct list **head)
     struct list *cur;
 
     pp = head;
-    while((*pp)->next)
+    while(*pp)
     {
         cur = *pp;
         if(cur->n == i)
@@ -88,8 +92,7 @@ void list_remove_pp(int i, struct list **head)
             *pp = cur->next;
             free(cur);
         }
-
-        pp = &(cur->next);   
+        pp = &((*pp)->next);   
     }
 }
 
