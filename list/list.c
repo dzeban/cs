@@ -1,12 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "slist.h"
+#include "list.h"
 
 // Double pointer is used to modify *original* pointer to list head - not a copy
 // See <http://c-faq.com/ptrs/passptrinit.html>
-void list_add_head(int i, struct list **head)
+void list_push(int i, struct list **head)
 {
-    struct list *item = (struct list *)malloc(sizeof(struct list));
+    // sizeof(*item) is better then sizeof(struct list) because if I change type
+    // of item malloc will still be working.
+
+    struct list *item = malloc(sizeof(*item));
 
     item->n = i;
     item->next = *head;
@@ -15,11 +18,11 @@ void list_add_head(int i, struct list **head)
     return;
 }
 
-// We do NOT need double pointer on head here because head is not modified - we
-// are adding to tail.
-void list_add_tail(int i, struct list *head)
+// We do NOT need double pointer on head here because head pointer is not
+// modified - we are adding to tail.
+void list_append(int i, struct list *head)
 {
-    struct list *item = (struct list *)malloc(sizeof(struct list));
+    struct list *item = malloc(sizeof(*item));
     item->n = i;
     item->next = NULL;
 
@@ -104,13 +107,9 @@ struct list *list_constructor_head(int n)
 
     for( i = 0; i < n; i++ )
     {
-        cur = (struct list *) malloc( sizeof(struct list) );
-        if( !cur ) 
-            return NULL;
+        cur = malloc( sizeof(*cur) );
 
-        cur->n = i;
-        cur->next = head;
-        head = cur;
+        list_push(i, &head);
     }
 
     return head;
@@ -125,7 +124,7 @@ struct list *list_constructor_tail(int n)
 
     for( i = 0; i < n; i++ )
     {
-        cur = (struct list *) malloc( sizeof(struct list) );
+        cur = (struct list *) malloc( sizeof(*cur) );
         cur->n = i;
         cur->next = NULL;
 
@@ -158,6 +157,19 @@ void list_print(struct list *head)
         printf("%p( %d ) -> ", cur, cur->n);
         cur = cur->next;
     }
-    printf("%p( %d ) -> NULL\n", cur, cur->n);
+    printf("%p( %d ) -> NULL\n\n", cur, cur->n);
     return;
+}
+
+int list_length(struct list *head)
+{
+    int length = 0;
+
+    while(head)
+    {
+        length++;
+        head = head->next;
+    }
+
+    return length;
 }
