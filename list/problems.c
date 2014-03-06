@@ -192,11 +192,37 @@ struct list *split(struct list **head)
         pp = &((*pp)->next);
     }
 
+    // FIXME
+    // Bad thing about this is that caller must free this memory :-(
     half = malloc( sizeof(*half) );
     half = *pp;
     *pp = NULL;
 
     return half;
+}
+
+// Split list using tricky technique with 2 pointers.
+// First pointer goes 1 node at time, second pointer goes 2 nodes at time. When
+// second pointer reaches the end, first pointer will point in middle.
+//
+// It's not cheaper, because this algorithm has complexity O(1.5N) that is
+// exactly as in simple algorithm.
+void split_tricky(struct list **head, struct list **half)
+{
+    struct list **p1, *p2;
+
+    p1 = head;
+    p2 = *head;
+    while(p2)
+    {
+        p1 = &((*p1)->next);
+        p2 = p2->next;
+        if(p2)
+            p2 = p2->next;
+    }
+
+    *half = *p1;
+    *p1 = NULL;
 }
 
 int main(int argc, const char *argv[])
@@ -207,9 +233,13 @@ int main(int argc, const char *argv[])
     head = list_constructor_tail(13);
     list_print(head);
 
-    head2 = split(&head);
+    head2 = malloc( sizeof(*head2) );
+    split_tricky( &head, &head2 );
+
     list_print(head);
     list_print(head2);
+
+    free(head2);
     
     return 0;
 }
