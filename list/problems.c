@@ -160,17 +160,54 @@ void append(struct list **head1, struct list **head2)
     *head2 = NULL;
 }
 
+// Problem 9.
+//
+// Given a list, split it into two sublists — one for the front half, and
+// one for the back half. If
+// the number of elements is odd, the extra element should go in the front list. 
+//
+// List in argument is first half. Returned list is a second half.
+// We need double pointer for list because we modify it by cutting it's tail.
+struct list *split(struct list **head)
+{
+    struct list *half;
+    struct list **pp;
+    int count;
+
+    pp = head;
+    count = 0;
+    while(*pp)
+    {
+        count++;
+        pp = &((*pp)->next);
+    }
+
+    // Divide and get bigger half
+    // count = 9 - 9/2 = 9 - 4 = 5
+    count = count - count/2;
+
+    pp = head;
+    while(count--)
+    {
+        pp = &((*pp)->next);
+    }
+
+    half = malloc( sizeof(*half) );
+    half = *pp;
+    *pp = NULL;
+
+    return half;
+}
+
 int main(int argc, const char *argv[])
 {
     struct list *head = NULL;
     struct list *head2 = NULL;
 
-    head2 = list_constructor_tail(13);
+    head = list_constructor_tail(13);
     list_print(head);
-    list_print(head2);
 
-
-    append( &head, &head2 );
+    head2 = split(&head);
     list_print(head);
     list_print(head2);
     
