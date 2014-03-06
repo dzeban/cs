@@ -141,19 +141,38 @@ void insert_sorted(struct list **head, int n)
 // in increasing order. It should use insert_sorted().
 void sort(struct list **head)
 {
+}
 
+// Problem 8.
+//
+// Write an Append() function that takes two lists, 'a' and 'b', appends 'b' onto
+// the end of 'a', and then sets 'b' to NULL
+void append(struct list **head1, struct list **head2)
+{
+    struct list **pp;
+    pp = head1;
+
+    while(*pp)
+    {
+        pp = &((*pp)->next);
+    }
+    *pp = *head2;
+    *head2 = NULL;
 }
 
 int main(int argc, const char *argv[])
 {
     struct list *head = NULL;
+    struct list *head2 = NULL;
 
-    head = list_constructor_tail(13);
+    head2 = list_constructor_tail(13);
     list_print(head);
+    list_print(head2);
 
 
-    insert_sorted( &head, 182 );
+    append( &head, &head2 );
     list_print(head);
+    list_print(head2);
     
     return 0;
 }
