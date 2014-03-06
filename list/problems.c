@@ -225,21 +225,48 @@ void split_tricky(struct list **head, struct list **half)
     *p1 = NULL;
 }
 
+// Problem 10.
+//
+// Write a function that removes duplicates from linked list.
+//
+// This algorithm is generic and doesn't require list to be sorted. 
+// It takes O(n^2) operations and works similar to insertion sort. 
+// Traversing each list element we traverse rest of list and removes all
+// elements equal to current.
+void dedup( struct list *head )
+{
+}
+
+// Removing duplicates from sorted linked list
+void dedup_sorted( struct list *head )
+{
+    struct list *cur, *tmp;
+
+    cur = head;
+    while(cur->next)
+    {
+        if( cur->n == cur->next->n )
+        {
+            tmp = cur->next;
+            cur->next = cur->next->next;
+            free(tmp);
+        }
+        else
+        {
+            cur = cur->next;
+        }
+    }
+}
+
 int main(int argc, const char *argv[])
 {
     struct list *head = NULL;
-    struct list *head2 = NULL;
 
-    head = list_constructor_tail(13);
-    list_print(head);
+    head = list_constructor_dup( 4, 3 );
+    list_print( head );
 
-    head2 = malloc( sizeof(*head2) );
-    split_tricky( &head, &head2 );
-
-    list_print(head);
-    list_print(head2);
-
-    free(head2);
+    dedup_sorted( head );
+    list_print( head );
     
     return 0;
 }

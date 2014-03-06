@@ -107,8 +107,6 @@ struct list *list_constructor_head(int n)
 
     for( i = 0; i < n; i++ )
     {
-        cur = malloc( sizeof(*cur) );
-
         list_push(i, &head);
     }
 
@@ -137,6 +135,22 @@ struct list *list_constructor_tail(int n)
 
         tail->next = cur;
         tail = cur;
+    }
+
+    return head;
+}
+
+struct list *list_constructor_dup(int n, int d)
+{
+    struct list *head = NULL;
+    int i, j;
+
+    for( i = 0; i < n; i++ )
+    {
+        for( j = 0; j < d; j++ )
+        {
+            list_push( i, &head );
+        }
     }
 
     return head;
