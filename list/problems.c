@@ -235,6 +235,29 @@ void split_tricky(struct list **head, struct list **half)
 // elements equal to current.
 void dedup( struct list *head )
 {
+    struct list *p;
+    struct list *tmp;
+    int n;
+
+    while(head)
+    {
+        n = head->n;
+        p = head;
+        while(p->next)
+        {
+            if(p->next->n == n)
+            {
+                tmp = p->next;
+                p->next = p->next->next;
+                free(tmp);
+            }
+            else
+            {
+                p = p->next;
+            }
+        }
+        head = head->next;
+    }
 }
 
 // Removing duplicates from sorted linked list
@@ -260,13 +283,14 @@ void dedup_sorted( struct list *head )
 
 int main(int argc, const char *argv[])
 {
-    struct list *head = NULL;
+    struct list *head1 = NULL;
+    struct list *head2 = NULL;
 
-    head = list_constructor_dup( 4, 3 );
-    list_print( head );
+    head1 = list_constructor_dup(1, 1);
+    list_print( head1 );
 
-    dedup_sorted( head );
-    list_print( head );
+    dedup(head1);
+    list_print( head1 );
     
     return 0;
 }
