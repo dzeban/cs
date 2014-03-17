@@ -281,16 +281,53 @@ void dedup_sorted( struct list *head )
     }
 }
 
+// Problem 11.
+//
+// Split list into 2 by alternating elements.
+void alternate_split(struct list *head, struct list **alt1, struct list **alt2)
+{
+    struct list *tmp1, *tmp2;
+    struct list **cur;
+    int n;
+
+    n = 0;
+    while(head)
+    {
+        cur_head = n++ % 2 ? alt1 : alt2;
+
+        // Current `head` element is added to head of alt list.
+        // To do so we are adjusting 2 pointers:
+        // 1. Head under `cur` pointer to current `head`
+        // 2. Current `head` next pointer to previous head under `cur`
+        tmp1 = *cur_head;
+        tmp2 = head->next;
+
+        *cur_head = head;
+        head->next = tmp1;
+        head = tmp2;
+    }
+    // At the end caller's list will have only first element, because we haven't
+    // changed caller's original pointer, but all subsequent pointers in list.
+}
+
 int main(int argc, const char *argv[])
 {
     struct list *head1 = NULL;
     struct list *head2 = NULL;
+    struct list *head3 = NULL;
 
-    head1 = list_constructor_dup(1, 1);
+    head1 = list_constructor_head(10);
     list_print( head1 );
 
-    dedup(head1);
+    alternate_split(head1, &head2, &head3);
+    printf("Source:\n");
     list_print( head1 );
+
+    printf("Alt1:\n");
+    list_print( head2 );
+
+    printf("Alt2:\n");
+    list_print( head3 );
     
     return 0;
 }
