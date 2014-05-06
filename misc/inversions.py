@@ -4,7 +4,7 @@
 import sys
 
 def splits(list, left, right):
-	i = j = k =0
+	i = j = k = 0
 	left_len = len(left)
 	right_len = len(right)
 	s = 0
@@ -34,19 +34,15 @@ def inversions(list):
 	if len(list) == 1:
 		return 0
 
-	middle = len(list) / 2
+	middle = len(list) // 2
 
 	left = list[:middle]
 	right = list[middle:]
 
-	left_inversions = 0
-	right_inversions = 0
-	split_inversions = 0
-
-	left_inversions = inversions(left)
-	right_inversions = inversions(right)
-	split_inversions = splits(list, left, right)
-	return (left_inversions + right_inversions + split_inversions)
+	a = inversions(left)
+	b = inversions(right)
+	c = splits(list, left, right)
+	return a + b + c
 
 def main():
 	list = []
