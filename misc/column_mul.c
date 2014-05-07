@@ -67,6 +67,12 @@ char *column_mul(char *a, char *b)
 		carry = n / 10;
 	}
 
+	for (i = 0; i < nb; i++)
+	{
+		free(inter_prod[i]);
+	}
+	free(inter_prod);
+
 	return c;
 }
 
@@ -75,5 +81,6 @@ int main(int argc, char *argv[])
 	char *result;
 	result = column_mul(argv[1], argv[2]);
 	printf("\nProduction: %s\n", result);
+	free(result);
 	return 0;
 }
