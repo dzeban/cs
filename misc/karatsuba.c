@@ -240,10 +240,10 @@ char *karatsuba(char **number1, char **number2)
     z3 = sub(&z3_tmp2, &z1);
 
     res = combine(&z1, &z2, &z3, n);
-    printf("x: %s, y: %s\n", x, y);
-    printf("a: %s, b: %s, c: %s, d: %s\n", a, b, c, d);
-    printf("z1: %s, z2: %s, z3: %s\n", z1, z2, z3);
-    printf("res: %s\n", res);
+    // printf("x: %s, y: %s\n", x, y);
+    // printf("a: %s, b: %s, c: %s, d: %s\n", a, b, c, d);
+    // printf("z1: %s, z2: %s, z3: %s\n", z1, z2, z3);
+    // printf("res: %s\n", res);
 
     free(a); free(b); free(c); free(d);
     free(z1); free(z2); free(z31); free(z32); free(z3); free(z3_tmp1); free(z3_tmp2);
