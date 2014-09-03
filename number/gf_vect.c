@@ -3,9 +3,12 @@
  */
 
 #include "gf.h"
+#include <string.h>
 #include <emmintrin.h>
 
-__m128i GF_vectmulX(__m128i v)
+#define SSE_BYTES 16
+
+static __m128i GF_vectmulX(__m128i v)
 {
     __m128i v1;
     __m128i mask;
@@ -15,7 +18,7 @@ __m128i GF_vectmulX(__m128i v)
     __m128i high_bit_mask = { 0x8080808080808080, 0x8080808080808080 };
     __m128i modulo_mask = { 0x1d1d1d1d1d1d1d1d, 0x1d1d1d1d1d1d1d1d};
 
-    unsigned char A[16] __attribute__((aligned(16)));
+    unsigned char A[SSE_BYTES] __attribute__((aligned(SSE_BYTES)));
     int i;
 
     // Zero out
@@ -36,6 +39,26 @@ __m128i GF_vectmulX(__m128i v)
     res = _mm_xor_si128(res, mask);
 
     return res;
+}
+
+// Wrapper of GF_vectmulX.
+// Does converstion of arguments to intrinsic types
+unsigned char *mulx(unsigned char *A, unsigned char *R)
+{
+    unsigned char *B; // [SSE_BYTES] __attribute__((aligned(SSE_BYTES)));
+    __m128i v;
+
+    posix_memalign((void **)&B, SSE_BYTES, SSE_BYTES);
+    memcpy(B, A, SSE_BYTES);
+    v = _mm_load_si128((__m128i *)B);
+
+    v = GF_vectmulX(v);
+
+    _mm_store_si128((__m128i *)B, v);
+
+    memcpy(R, B, SSE_BYTES);
+
+    return B;
 }
 
 int main()
