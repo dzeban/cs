@@ -35,10 +35,11 @@ EX_GRAPH2 = {
 def make_complete_graph(num_nodes):
     """ Creates complete directed graph (without cycles) """
     graph = {}
-    for index in xrange(num_nodes):
-        graph[index] = set([])
-        for jey in xrange(index):
-            graph[index].add(jey)
+    for cur_node in xrange(num_nodes):
+        graph[cur_node] = set([])
+        for node in xrange(cur_node):
+            graph[cur_node].add(node)
+            graph[node].add(cur_node)
     return graph
 
 def compute_in_degrees(digraph):
@@ -46,9 +47,9 @@ def compute_in_degrees(digraph):
     graph = {}
     for node in digraph:
         graph[node] = 0
-        for key, val in digraph.iteritems():
-            if key != node:
-                if node in val:
+        for cur_node, adj_nodes in digraph.iteritems():
+            if cur_node != node:
+                if node in adj_nodes:
                     graph[node] = graph[node]+1
 
     return graph
