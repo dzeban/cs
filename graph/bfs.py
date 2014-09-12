@@ -1,70 +1,60 @@
 #!/usr/bin/env python
 
+""" Breadth-first search and connected components """
+
 from collections import deque
-from degree_distribution import EX_GRAPH0, EX_GRAPH1, EX_GRAPH2
-from copy import copy
-
-EX_GRAPH0 = {
-        0: set([1, 2]),
-        1: set([0]),
-        2: set([0])
-}
-
-EX_GRAPH1 = {
-    0: set([1, 4, 5]),
-    1: set([0, 4, 2, 6]),
-    2: set([1, 5, 3]),
-    3: set([2, 0]),
-    4: set([0, 1]),
-    5: set([0, 2]),
-    6: set([1])
-}
-
-EX_GRAPH2 = {
-    0: set([1, 4, 5]),
-    1: set([0, 4, 2, 6]),
-    2: set([1, 5, 3, 7]),
-    3: set([2, 7]),
-    4: set([0, 1]),
-    5: set([0, 2]),
-    6: set([1]),
-    7: set([2, 3]),
-    8: set([9]),
-    9: set([8])
-}
 
 def bfs_visited(ugraph, start_node):
-    Q = deque()
+    """ Breadth-first search with queue """
+    queue = deque()
     visited = set([start_node])
-    Q.appendleft(start_node)
-    while len(Q) != 0:
-        j = Q.pop()
+    queue.appendleft(start_node)
+    while len(queue) != 0:
+        cur = queue.pop()
 
-        for h in ugraph[j]:
-            if h not in visited:
-                visited.add(h)
-                Q.appendleft(h)
+        for adj in ugraph[cur]:
+            if adj not in visited:
+                visited.add(adj)
+                queue.appendleft(adj)
 
     return visited
 
-def cc_visited(ugraph):
-    remaining_nodes = copy(ugraph)
-    CC = []
+def cc_visited(graph):
+    """ Connected components """
+    remaining_nodes = graph.copy()
+    cc_list = []
     while len(remaining_nodes) != 0:
-        i = remaining_nodes.keys()[0]
-        W = bfs_visited(ugraph, i)
-        CC.append(W)
-        for node in W:
+        key = remaining_nodes.keys()[0]
+        bfs = bfs_visited(graph, key)
+        cc_list.append(bfs)
+        for node in bfs:
             remaining_nodes.pop(node)
 
-    return CC
+    return cc_list
 
 def largest_cc_size(ugraph):
-    CC = cc_visited(ugraph)
-    return len(max(CC))
+    """ Largest connected component size """
+    cc_list = cc_visited(ugraph)
+    lenghts = [len(component) for component in cc_list]
+    if len(lenghts) == 0:
+        return 0
+    else:
+        return max(lenghts)
+
+def compute_resilience(ugraph, attack_order):
+    """ Graph resilience on attack """
+    graph = ugraph.copy()
+    resilience = [largest_cc_size(graph)]
+    for rnode in attack_order:
+        # Remove node and all edges
+        adjacents = graph.pop(rnode)
+        for adjacent in adjacents:
+            edges = graph[adjacent]
+            edges.remove(rnode)
+
+        # Recompute largest connected component
+        resilience.append(largest_cc_size(graph))
+    return resilience
 
 if __name__ == '__main__':
-    print(cc_visited(EX_GRAPH0))
-    print(cc_visited(EX_GRAPH1))
-    cc2 = cc_visited(EX_GRAPH2)
-    print(largest_cc_size(EX_GRAPH2))
+    pass
