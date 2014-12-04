@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include "list.h"
 
 // Double pointer is used to modify *original* pointer to list head - not a copy
@@ -102,7 +103,6 @@ void list_remove_pp(int i, struct list **head)
 struct list *list_constructor_head(int n)
 {
     struct list *head = NULL;
-    struct list *cur = NULL;
     int i = 0;
 
     for( i = 0; i < n; i++ )
@@ -111,6 +111,23 @@ struct list *list_constructor_head(int n)
     }
 
     return head;
+}
+
+struct list *list_constructor_va(int count, ...)
+{
+	struct list *head = NULL;
+	int i, n;
+	va_list ap;
+
+	va_start (ap, count);
+	for (i = 0; i < count; i++)
+	{
+		n = va_arg(ap, int);
+		list_push(n, &head);
+	}
+	va_end (ap);
+
+	return head;
 }
 
 struct list *list_constructor_tail(int n)

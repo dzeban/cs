@@ -98,36 +98,48 @@ def sdc_detect(D):
 	return j
 
 def main():
+	print('Syndromes calculation')
 	D = [ 0x11, 0x22, 0x33, 0x44,
 	      0x55, 0x66, 0x77, 0x88,
 	      0x99, 0xaa, 0xbb, 0xcc,
 	      0xdd, 0xee, 0x00, 0x00 ]
 
+	printD(D)
 	calculate_s0s1(D)
-	print('Original data:')
 	printD(D)
 
 	print('#------------------------#')
+	print('Recovering disk #2 from S0')
 
-	print('Failing disk #2')
+	D = [ 0x11, 0x22, 0x00, 0x44, 
+	      0x55, 0x66, 0x77, 0x88, 
+	      0x99, 0xaa, 0xbb, 0xcc, 
+	      0xdd,	0xee, 0xd9 ,0x8e ] 
 	D[2] = 0
 	printD(D)
-	print('Recovering from S0:')
 	D[2] = recover1d_s0(D, 2)
 	printD(D)
 
 	print('#------------------------#')
+	print('Recovering disk #2 from S1')
 
-	print('Failing disk #3')
-	D[3] = 0
+	D = [ 0x11, 0x22, 0x00, 0x44, 
+	      0x55, 0x66, 0x77, 0x88, 
+	      0x99, 0xaa, 0xbb, 0xcc,
+	      0xdd,	0xee, 0x00, 0x91 ]
+	D[2] = 0
 	printD(D)
 	print('Recovering from S1:')
-	D[3] = recover1d_s1(D, 3)
+	D[2] = recover1d_s1(D, 2)
 	printD(D)
 
 	print('#------------------------#')
 
-	print('Failing disks #3 and #7')
+	print('Recovering disks #3 and #7 from S0 and S1')
+	D = [ 0x11, 0x22, 0x33, 0x00, 
+	      0x55, 0x66, 0x77, 0x00,
+	      0x99, 0xaa, 0xbb, 0xcc, 
+	      0xdd,	0xee, 0x11, 0xe7 ]
 	D[3] = 0
 	D[7] = 0
 	printD(D)
@@ -139,18 +151,20 @@ def main():
 	print('       SDC detection       ')
 
 	print('Original array:')
-	D2 = [ 0x1e, 0x45, 0x6f, 0x2a,
+	D = [ 0x1e, 0x45, 0x6f, 0x2a,
 	      0x88, 0xef, 0x7b, 0x0,
 	      0xbb, 0x67, 0x17, 0x8,
 	      0x0f, 0x86, 0xb8, 0xc0 ]
-	printD(D2)
+	printD(D)
 
-	failed = sdc_detect(D2)
+	failed = sdc_detect(D)
 	if failed != -1:
 		print('SDC detected in {}'.format(failed))
-		print('Corrected value {}'.format(hex(D2[failed])))
+		print('Corrected value {}'.format(hex(D[failed])))
 		print('Corrected array')
-		printD(D2)
+		printD(D)
 
 if __name__ == '__main__':
 	main()
+
+# vim: set noexpandtab:
