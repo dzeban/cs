@@ -3,6 +3,8 @@
 
 #include "../queue/queue_void.h"
 
+#define max(a, b) a > b ? a : b
+
 struct bst {
 	int n;
 	struct bst *left;
@@ -88,6 +90,27 @@ void bst_free(struct bst *tree)
 	}
 }
 
+int bst_height(struct bst *tree)
+{
+	// Base case
+	if (tree == NULL) {
+		return 0;
+	}
+	// Leaf
+	else if( (tree->left == NULL) && (tree->right == NULL)) {
+		return 1;
+	}
+	// Generic case: height is max of subtrees + 1
+	else {
+		int l, r, m;
+		l = bst_height(tree->left);
+		r = bst_height(tree->right);
+		m = max(l, r);
+
+		return 1 + m;
+	}
+}
+
 int main(int argc, const char *argv[])
 {
 	int N, n, i;
@@ -105,13 +128,13 @@ int main(int argc, const char *argv[])
 		bst_add(&root, n);
 	}
 
+	printf("Height: %d\n", bst_height(root));
+
 	bst_in_order(root);
 	printf("----\n");
 	bst_pre_order(root);
 	printf("----\n");
 	bst_post_order(root);
-	printf("----\n");
-	bst_level_order(root);
 	printf("----\n");
 	
 	bst_free(root);
