@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "../queue/queue_void.h"
 
@@ -96,10 +97,6 @@ int bst_height(struct bst *tree)
 	if (tree == NULL) {
 		return 0;
 	}
-	// Leaf
-	else if( (tree->left == NULL) && (tree->right == NULL)) {
-		return 1;
-	}
 	// Generic case: height is max of subtrees + 1
 	else {
 		int l, r, m;
@@ -109,6 +106,52 @@ int bst_height(struct bst *tree)
 
 		return 1 + m;
 	}
+}
+
+bool bst_check_balanced(struct bst *tree)
+{
+	int l, r;
+	if (tree == NULL)
+		return true;
+
+	l = bst_height(tree->left);
+	r = bst_height(tree->right);
+
+	if (abs(l - r) > 1) 
+		return false;
+
+	return bst_check_balanced(tree->left) && bst_check_balanced(tree->right);
+}
+
+int bst_check_height(struct bst *tree)
+{
+	if (tree == NULL) {
+		return 0;
+	} else {
+		int l, r, m;
+		l = bst_height(tree->left);
+		if (l == -1)
+			return -1;
+
+		r = bst_height(tree->right);
+		if (r == -1)
+			return -1;
+
+		m = max(l, r);
+
+		if (abs(l-r) > 1)
+			return -1;
+		else
+			return 1 + m;
+	}
+}
+
+bool bst_check_balanced_optimized(struct bst *tree)
+{
+	if (bst_check_height(tree) == -1)
+		return false;
+	else
+		return true;
 }
 
 int main(int argc, const char *argv[])
@@ -129,12 +172,15 @@ int main(int argc, const char *argv[])
 	}
 
 	printf("Height: %d\n", bst_height(root));
+	printf("Balanced: %d\n", bst_check_balanced_optimized(root));
 
 	bst_in_order(root);
 	printf("----\n");
 	bst_pre_order(root);
 	printf("----\n");
 	bst_post_order(root);
+	printf("----\n");
+	bst_level_order(root);
 	printf("----\n");
 	
 	bst_free(root);
