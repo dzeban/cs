@@ -1,2 +1,5 @@
 a.out
 *.o
+*.swp
+*.swo
+tags
