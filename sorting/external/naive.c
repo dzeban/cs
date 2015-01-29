@@ -1,29 +1,42 @@
+/*
+ * Naive sorting of big file.
+ *
+ * This program reads whole file to array held in memory
+ * and then invokes qsort on this array.
+ *
+ * As bonus feature this program implements 
+ * dynamic resizing array in `readfile` function.
+ *
+ * This is a baseline for testing performance and 
+ * resourse usage in external sorting experiments.
+ *
+ * Copyright (c) 2014 Alex Dzyoba <avd@reduct.ru>
+ * 
+ * This project is licensed under the terms of the MIT license
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 
-#define INC_COEFF 2
 
-FILE *fp;
+// Increasing coefficient used in dynamic resizing.
+#define INC_COEFF 2
 
 void print_arr(int A[], int n)
 {
 	int i;
 	for (i = 0; i < n; i++)
-	{
 		printf("%d\n", A[i]);
-	}
 }
 
 int readfile(int *array[], const char *filename)
 {
+	FILE *fp;
+	int *A;
 	char *line = NULL;
 	size_t len = 0;
 	ssize_t read;
-	int *A;
-	int limit;
-	int i;
-	long d;
+	int limit, i, d;
 
 	fp = fopen(filename, "r");
 	if (fp == NULL) {
@@ -35,7 +48,7 @@ int readfile(int *array[], const char *filename)
 	A = calloc(limit, sizeof(int));
 	if (!A) {
 		perror("calloc");
-		return -1;
+		goto err_close;
 	}
 
 	i = 0;
@@ -45,7 +58,7 @@ int readfile(int *array[], const char *filename)
 		d = strtol(line, NULL, 0);
 		if (errno) {
 			perror("strtol");
-			return -1;
+			goto err_free;
 		}
 
 		A[i++] = d;
@@ -65,6 +78,14 @@ int readfile(int *array[], const char *filename)
 	*array = A;
 
 	return i;
+
+err_free:
+	if (A)
+		free(A);
+
+err_close:
+	fclose(fp);
+	return -1;
 }
 
 int compar(const void *p1, const void *p2)

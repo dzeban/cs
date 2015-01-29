@@ -1,3 +1,21 @@
+/*
+ * Sorting of big file with mmap.
+ *
+ * NOTE: This program works with files containing 
+ * integers in raw binary form! Use raw_conv.py to 
+ * convert from ASCII to raw binary and back.
+ *
+ * This program maps file to memory with mmap call and 
+ * then invokes qsort on mmap'ed memory in hope that 
+ * kernel will handle memory eviction and swapping by itself.
+ *
+ * Length of mapping can be supplied by user via 
+ * command-line. By default, length of mapping is filesize.
+ *
+ * Copyright (c) 2015 Alex Dzyoba <avd@reduct.ru>
+ * 
+ * This project is licensed under the terms of the MIT license
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/mman.h>
@@ -9,9 +27,7 @@ void print_arr(int A[], int n)
 {
 	int i;
 	for (i = 0; i < n; i++)
-	{
 		printf("%d\n", A[i]);
-	}
 }
 
 int compar(const void *p1, const void *p2)
@@ -62,7 +78,7 @@ int main(int argc, const char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	n = file_length/sizeof(int);
+	n = file_length / sizeof(int); // Number of elements in file
 	qsort(A, n, sizeof(int), compar);
 	print_arr(A, n);
 	
