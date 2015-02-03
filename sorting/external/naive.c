@@ -1,8 +1,8 @@
 /*
  * Naive sorting of big file.
  *
- * This program reads whole file to array held in memory
- * and then invokes qsort on this array.
+ * This program reads whole file of *binary numbers* 
+ * to array held in memory and then invokes qsort on this array.
  *
  * As bonus feature this program implements 
  * dynamic resizing array in `readfile` function.
@@ -33,12 +33,11 @@ int readfile(int *array[], const char *filename)
 {
 	FILE *fp;
 	int *A;
-	char *line = NULL;
-	size_t len = 0;
-	ssize_t read;
+	size_t bytes_read = 0;
 	int limit, i, d;
+	int read;
 
-	fp = fopen(filename, "r");
+	fp = fopen(filename, "rb");
 	if (fp == NULL) {
 		fprintf(stderr, "Failed to open file %s\n", filename);
 		return -1;
@@ -52,14 +51,11 @@ int readfile(int *array[], const char *filename)
 	}
 
 	i = 0;
-	while ((read = getline(&line, &len, fp)) != -1) 
+	while (!feof(fp))
 	{
-		errno = 0;
-		d = strtol(line, NULL, 0);
-		if (errno) {
-			perror("strtol");
-			goto err_free;
-		}
+		read = fread(&d, sizeof(int), 1, fp);
+		if (read == 0)
+			break;
 
 		A[i++] = d;
 
@@ -73,7 +69,6 @@ int readfile(int *array[], const char *filename)
 	// Truncate back
 	A = realloc(A, i * sizeof(int));
 	fclose(fp);
-	free(line);
 
 	*array = A;
 
