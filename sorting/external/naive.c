@@ -98,7 +98,7 @@ int main(int argc, const char *argv[])
 {
 	int *A;
 	int n;
-	clock_t start, end, spent;
+	clock_t start, end;
 
 	if (argc < 2) {
 		fprintf(stderr, "Usage: %s <file to sort>\n", argv[0]);
@@ -111,16 +111,13 @@ int main(int argc, const char *argv[])
 		return -1;
 	}
 
-	fprintf(stderr, "File read to array of size %d\n", n * sizeof(int));
-	
 	start = clock();
 	qsort(A, n, sizeof(int), compar);
 	end = clock();
 
 	print_arr(A, n);
 
-	spent = end - start;
-	fprintf(stderr, "Seconds: %f, clocks: %ld\n", (double)spent / CLOCKS_PER_SEC, spent);
+	fprintf(stderr, "%ld bytes sorted in %f seconds\n", n * sizeof(int), (double)(end - start) / CLOCKS_PER_SEC);
 	
 	free(A);
 	return 0;

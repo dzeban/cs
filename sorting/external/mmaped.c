@@ -49,7 +49,7 @@ int main(int argc, const char *argv[])
 	int file_length;
 	int *A;
 	int n;
-	clock_t start, end, spent;
+	clock_t start, end;
 
 	if (argc < 2) {
 		fprintf(stderr, "%s <filename> [<map len>]\n", argv[0]);
@@ -86,7 +86,6 @@ int main(int argc, const char *argv[])
 	end = clock();
 	print_arr(A, n);
 	
-	spent = end - start;
-	fprintf(stderr, "Seconds: %f, Clocks: %ld\n", (double)spent / CLOCKS_PER_SEC, spent); 
+	fprintf(stderr, "%ld bytes sorted in %f seconds\n", file_length, (double)(end - start) / CLOCKS_PER_SEC); 
 	return 0;
 }
