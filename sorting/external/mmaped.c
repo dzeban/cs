@@ -22,6 +22,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <time.h>
 
 void print_arr(int A[], int n)
 {
@@ -48,6 +49,7 @@ int main(int argc, const char *argv[])
 	int file_length;
 	int *A;
 	int n;
+	clock_t start, end, spent;
 
 	if (argc < 2) {
 		fprintf(stderr, "%s <filename> [<map len>]\n", argv[0]);
@@ -79,8 +81,12 @@ int main(int argc, const char *argv[])
 	}
 
 	n = file_length / sizeof(int); // Number of elements in file
+	start = clock();
 	qsort(A, n, sizeof(int), compar);
+	end = clock();
 	print_arr(A, n);
 	
+	spent = end - start;
+	fprintf(stderr, "Seconds: %f, Clocks: %ld\n", (double)spent / CLOCKS_PER_SEC, spent); 
 	return 0;
 }
