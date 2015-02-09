@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <time.h>
 
 
 // Increasing coefficient used in dynamic resizing.
@@ -97,6 +98,7 @@ int main(int argc, const char *argv[])
 {
 	int *A;
 	int n;
+	clock_t start, end, spent;
 
 	if (argc < 2) {
 		fprintf(stderr, "Usage: %s <file to sort>\n", argv[0]);
@@ -111,9 +113,14 @@ int main(int argc, const char *argv[])
 
 	fprintf(stderr, "File read to array of size %d\n", n * sizeof(int));
 	
+	start = clock();
 	qsort(A, n, sizeof(int), compar);
+	end = clock();
 
 	print_arr(A, n);
+
+	spent = end - start;
+	fprintf(stderr, "Seconds: %f, clocks: %ld\n", (double)spent / CLOCKS_PER_SEC, spent);
 	
 	free(A);
 	return 0;
