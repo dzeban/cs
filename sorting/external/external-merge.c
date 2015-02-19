@@ -170,6 +170,7 @@ int ext_merge_sort(FILE *f, char *dir, size_t bufsize)
 		chunk_offset += bufsize / chunks;
 	}
 
+	free(buf);
 	return 0;
 }
 
