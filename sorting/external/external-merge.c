@@ -1,6 +1,9 @@
 /*
  * External merge sorting of big file.
  *
+ * WARNING: Works only when buffer size is aliquot part of file size!
+ *          This is for simplicity of implementation.
+ *
  * Copyright (c) 2015 Alex Dzyoba <avd@reduct.ru>
  * 
  * This project is licensed under the terms of the MIT license
@@ -91,82 +94,99 @@ exit:
 	return ret;
 }
 
-void merge_chunks(char *dir, char *buf, size_t bufsize, int chunks, int chunk_offset)
+// Return chunks number of -1 on error
+int split(FILE *f, off_t filesize, char *dir, char *buf, size_t bufsize)
 {
-	int *tmp;
-	int i, n, nread, nelem;
-	int buf_offset;
-	char *path;
+	int chunks;
+	int n, nread;
+	int i;
+
+	n = bufsize / sizeof(int);
+   
+	// XXX: we assume that filesize % bufsize == 0
+	chunks = filesize / bufsize;
+	for (i = 0; i < chunks; i++)
+	{
+		memset(buf, 0, bufsize);
+		nread = fread(buf, sizeof(int), n, f);
+
+		if (nread < n) {
+			fprintf(stderr, "I/O error. Asked to read %d bytes, got %d\n", n, nread);
+			return -1;
+		}
+
+		qsort(buf, nread, sizeof(int), compar);
+		save_buf(buf, nread, dir, i);
+		fprintf(stderr, "Saved chunk #%d of size %ld\n", i, nread * sizeof(int));
+	}
+
+	return chunks;
+}
+
+int merge(char *dir, char *buf, size_t bufsize, int chunks, size_t offset)
+{
 	FILE *f;
+	int slice;
+	char *path;
+	int buf_offset;
+	int i, n;
 
-	// How many bytes to read from each chunk
-	n = bufsize / chunks;
-
-	tmp = malloc(n);
-
+	slice = bufsize / chunks;
 	buf_offset = 0;
-	memset(buf, 0, bufsize);
+
+	// Each chunk has `chunk` number of slices.
 	for (i = 0; i < chunks; i++)
 	{
 		path = form_filename(i, dir);
+		fprintf(stderr, "Chunk %s at offset %zu\n", path, offset);
+
 		f = fopen(path, "rb");
-		fseek(f, chunk_offset, SEEK_SET);
+		if (f == NULL) {
+			perror("fopen");
+			return -1;
+		}
+		fseek(f, offset, SEEK_SET);
 
-		// We need to read to tmp buf because 
-		// last piece in chunks can be not aligned to bufsize
-		memset(tmp, 0, n);
-		nread = fread(tmp, 1, n, f);
 
-		memcpy(buf + buf_offset, tmp, nread);
-		buf_offset += nread;
-
-		fclose(f);
-		free(path);
+		// Accumulate slices from each chunk in buffer.
+		n = fread(buf + buf_offset, 1, slice, f);
+		buf_offset += n;
 	}
 
-	nelem = buf_offset / sizeof(int);
-	qsort(buf, nelem, sizeof(int), compar);
+	// Thoughout this function we used buf as char array to use byte-addressing.
+	// But now we need to act on ints inside that buffer, so we cast it to actual type.
+	n = buf_offset / sizeof(int);
+	qsort(buf, n, sizeof(int), compar);
+	print_arr((int *)buf, n);
 
-	// Thoughout the code we use buf as char array to use byte-addressing.
-	// But to print values we cast it to actual type.
-	print_arr((int *)buf, nelem);
-
-	free(tmp);
+	return 0;
 }
 
-int ext_merge_sort(FILE *f, char *dir, size_t bufsize)
+int external_merge_sort(FILE *f, off_t filesize, char *dir, size_t bufsize)
 {
-	char *buf;
-	int n, nread;
 	int chunks;
+	char *buf;
 	size_t chunk_offset;
 
-	n = bufsize / sizeof(int);
 	buf = malloc(bufsize);
 	if (!buf) {
 		perror("malloc");
 		return -ENOMEM;		
 	}
 
-	// Phase 1: split and sort chunks
-
-	chunks = 0;
-	while (!feof(f))
-	{
-		memset(buf, 0, bufsize);
-		nread = fread(buf, sizeof(int), n, f);
-		qsort(buf, nread, sizeof(int), compar);
-		save_buf(buf, nread, dir, chunks);
-		chunks++;
+	// Phase 1: split file to sorted chunks of size bufsize.
+	chunks = split(f, filesize, dir, buf, bufsize);
+	if (chunks < 0) {
+		free(buf);
+		return -1;
 	}
 
-	// Phase 2: merge chunks
-	
-	// Read through chunks. Each chunk is of size bufsize.
+	// Phase 2: merge chunks.
 	chunk_offset = 0;
-	while (chunk_offset != bufsize)
+	while (chunk_offset < bufsize)
 	{
-		merge_chunks(dir, buf, bufsize, chunks, chunk_offset);
+		fprintf(stderr, "-> Merging chunks at offset %zu/%zu\n", chunk_offset, bufsize);
+		merge(dir, buf, bufsize, chunks, chunk_offset);
 		chunk_offset += bufsize / chunks;
 	}
 
@@ -178,7 +198,8 @@ int main(int argc, const char *argv[])
 	FILE *f;
 	char *dirpath;
 	size_t bufsize;
-	const char dirname[] = "sort";
+	char dirname[] = "sort.XXXXXX";
+	struct stat sb;
 
 	if (argc != 3) {
 		fprintf(stderr, "Usage: %s <file to sort> <buffer size>\n", argv[0]);
@@ -192,36 +213,39 @@ int main(int argc, const char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
+	// Check that buffer is aliquot part of file size.
+	if (stat(argv[1], &sb)) {
+		perror("stat");
+		exit(EXIT_FAILURE);
+	}
+	if (sb.st_size % bufsize) {
+		fprintf(stderr, "Buffer size %zu is not divisor of file size %zu ",
+				bufsize, sb.st_size);
+		fprintf(stderr, "but this is required.\n");
+		fprintf(stderr, "You may, for example, choose buffer size %zu\n", sb.st_size / 10);
+		exit(EXIT_FAILURE);
+	}
+
 	f = fopen(argv[1], "rb");
 	if (f == NULL) {
 		perror("fopen");
 		exit(EXIT_FAILURE);
 	}
 
-	dirpath = tempnam(NULL, dirname);
-
-	fprintf(stderr, "Temp dir %s\n", dirpath);
-
-	if (mkdir(dirpath, S_IRWXU)) {
-		perror("mkdir");
+	// Create temp dir
+	dirpath = mkdtemp(dirname);
+	if (dirpath == NULL) {
+		perror("mkdtemp");
 		goto err;
 	}
 
-	if (ext_merge_sort(f, dirpath, bufsize)) {
+	// Do stuff
+	if (external_merge_sort(f, sb.st_size, dirpath, bufsize)) {
 		fprintf(stderr, "Failed to sort %s\n", argv[1]);
 		goto err;
 	}
 
 err:
-	if (dirpath != NULL) {
-		struct stat st;
-		if (stat(dirpath, &st) == 0) {
-			fprintf(stderr, "Removing %s\n", dirpath);
-			rmdir(dirpath);
-		}
-
-		free(dirpath);
-	}
 
 	fclose(f);
 	return 0;
