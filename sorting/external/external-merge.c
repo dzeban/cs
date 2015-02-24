@@ -14,7 +14,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <errno.h>
-
+#include <time.h>
 
 void print_arr(int A[], int n)
 {
@@ -168,6 +168,7 @@ int external_merge_sort(FILE *f, off_t filesize, char *dir, size_t bufsize)
 	char *buf;
 	size_t chunk_offset;
 
+	// XXX: Here is the only buffer available to us.
 	buf = malloc(bufsize);
 	if (!buf) {
 		perror("malloc");
@@ -201,6 +202,8 @@ int main(int argc, const char *argv[])
 	size_t bufsize;
 	char dirname[] = "sort.XXXXXX";
 	struct stat sb;
+	off_t file_size;
+	clock_t start, end;
 
 	if (argc != 3) {
 		fprintf(stderr, "Usage: %s <file to sort> <buffer size>\n", argv[0]);
@@ -219,11 +222,13 @@ int main(int argc, const char *argv[])
 		perror("stat");
 		exit(EXIT_FAILURE);
 	}
-	if (sb.st_size % bufsize) {
+
+	file_size = sb.st_size;
+	if (file_size % bufsize) {
 		fprintf(stderr, "Buffer size %zu is not divisor of file size %zu ",
-				bufsize, sb.st_size);
+				bufsize, file_size);
 		fprintf(stderr, "but this is required.\n");
-		fprintf(stderr, "You may, for example, choose buffer size %zu\n", sb.st_size / 10);
+		fprintf(stderr, "You may, for example, choose buffer size %zu\n", file_size / 10);
 		exit(EXIT_FAILURE);
 	}
 
@@ -241,10 +246,13 @@ int main(int argc, const char *argv[])
 	}
 
 	// Do stuff
-	if (external_merge_sort(f, sb.st_size, dirpath, bufsize)) {
+	start = clock();
+	if (external_merge_sort(f, file_size, dirpath, bufsize)) {
 		fprintf(stderr, "Failed to sort %s\n", argv[1]);
 		goto err;
 	}
+	end = clock();
+	fprintf(stderr, "%ld bytes sorted in %f seconds\n", file_size, (double)(end - start) / CLOCKS_PER_SEC); 
 
 err:
 
