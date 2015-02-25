@@ -151,6 +151,7 @@ int merge(char *dir, char *buf, size_t bufsize, int chunks, size_t offset)
 		// Accumulate slices from each chunk in buffer.
 		n = fread(buf + buf_offset, 1, slice, f);
 		buf_offset += n;
+		fclose(f);
 	}
 
 	// Thoughout this function we used buf as char array to use byte-addressing.
