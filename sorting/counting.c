@@ -212,7 +212,7 @@ int main(int argc, const char *argv[])
 
 	fclose(f);
 
-	fprintf(stderr, "%ld bytes sorted in %f seconds\n", n * sizeof(int), (double)(end - start) / CLOCKS_PER_SEC);
+	fprintf(stderr, "%ld bytes sorted in %f seconds\n", filesize, (double)(end - start) / CLOCKS_PER_SEC);
 	
 	return 0;
 }
