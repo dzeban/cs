@@ -146,17 +146,25 @@ int counter_cmp(const void *p1, const void *p2)
 }
 
 // Return number of elements
-int counting_sort(FILE *f, struct CT *T)
+int counting_sort(FILE *f, struct CT *T, size_t bufn)
 {
-	int d, read;
+	int d, read, i;
+	int *buf;
+
+	buf = malloc(bufn * sizeof(int));
+	if (!buf) {
+		perror("malloc");
+		exit(EXIT_FAILURE);
+	}
 
 	while (!feof(f))
 	{
-		read = fread(&d, sizeof(int), 1, f);
+		read = fread(buf, sizeof(int), bufn, f);
 		if (read == 0)
 			break;
 
-		ct_insert(T, d);
+		for (i = 0; i < read; i++)
+			ct_insert(T, buf[i]);
 	}
 
 	// Truncate counter table back
@@ -166,6 +174,8 @@ int counting_sort(FILE *f, struct CT *T)
 	// Now, we have table of counters, but we need to sort counters.
 	// Assuming range is much smaller than data, it's going to be fast.
 	qsort(T->table, T->last, sizeof(struct counter), counter_cmp);
+
+	free(buf);
 
 	return T->last;
 }
@@ -178,9 +188,10 @@ int main(int argc, const char *argv[])
 	struct CT *T;
 	clock_t start, end;
 	int n;
+	size_t bufn = 100;
 
 	if (argc < 2) {
-		fprintf(stderr, "%s <filename>\n", argv[0]);
+		fprintf(stderr, "%s <filename> [buffer elements=100]\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 
@@ -189,6 +200,9 @@ int main(int argc, const char *argv[])
 		fprintf(stderr, "Failed to open file %s\n", argv[1]);
 		return EXIT_FAILURE;
 	}
+
+	if (argc == 3)
+		bufn = strtol(argv[2], NULL, 0);
 
 	// Check that buffer is aliquot part of file size.
 	if (stat(argv[1], &sb)) {
@@ -204,7 +218,7 @@ int main(int argc, const char *argv[])
 
 	start = clock();
 	T = ct_new();
-	n = counting_sort(f, T);
+	n = counting_sort(f, T, bufn);
 	end = clock();
 
 	ct_out(T);
@@ -213,6 +227,5 @@ int main(int argc, const char *argv[])
 	fclose(f);
 
 	fprintf(stderr, "%ld bytes sorted in %f seconds\n", filesize, (double)(end - start) / CLOCKS_PER_SEC);
-	
 	return 0;
 }
