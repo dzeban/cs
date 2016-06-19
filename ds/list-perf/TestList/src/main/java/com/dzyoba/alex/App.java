@@ -6,32 +6,17 @@ import java.util.LinkedList;
 import java.util.Arrays;
 import java.util.Random;
 
-/*
-$ java com.dzyoba.alex.TestList 
-Testing LinkedList
-Allocation: 7/20/397 ms
-Insert: 9209/10550/22125 ms
-InsertHead: 0/1/2 ms
-InsertTail: 0/1/1 ms
-Search: 24138/25877/51700 ms
-Delete: 6/6/12 ms
-------------------
 
-Testing ArrayList
-Allocation: 6/7/27 ms
-Insert: 1508/1538/1565 ms
-InsertHead: 4047/4064/4132 ms
-InsertTail: 0/0/1 ms
-Search: 8988/9134/9304 ms
-Delete: 0/0/5 ms
-*/
-
-
-public class TestList {
+/**
+ * Hello world!
+ *
+ */
+public class App {
     private static final long LIST_ELEMENTS = 1_000_000;
-    private static final long RANDOM_ELEMENTS = 10_000;
+    private static final long RANDOM_OPS = 10_000;
 
     public static void main(String[] args) {
+        System.out.printf("Testing with %d elements, %d random ops\n", LIST_ELEMENTS, RANDOM_OPS);
         System.out.println("Testing LinkedList");
         LinkedList<Integer> linkedList = new LinkedList<>();
         testList(linkedList, 10);
@@ -84,7 +69,7 @@ public class TestList {
         long startTime = System.currentTimeMillis();
         int index, element;
         Random randGen = new Random();
-        for (int i = 0; i < RANDOM_ELEMENTS; i++) {
+        for (int i = 0; i < RANDOM_OPS; i++) {
             index = randGen.nextInt((int)LIST_ELEMENTS);
             element = randGen.nextInt((int)LIST_ELEMENTS);
             list.add(index, element);
@@ -97,7 +82,7 @@ public class TestList {
         long startTime = System.currentTimeMillis();
         int element;
         Random randGen = new Random();
-        for (int i = 0; i < RANDOM_ELEMENTS; i++) {
+        for (int i = 0; i < RANDOM_OPS; i++) {
             element = randGen.nextInt((int)LIST_ELEMENTS);
             list.add(0, element);
         }
@@ -109,7 +94,7 @@ public class TestList {
         long startTime = System.currentTimeMillis();
         int element;
         Random randGen = new Random();
-        for (int i = 0; i < RANDOM_ELEMENTS; i++) {
+        for (int i = 0; i < RANDOM_OPS; i++) {
             element = randGen.nextInt((int)LIST_ELEMENTS);
             list.add(element);
         }
@@ -121,7 +106,7 @@ public class TestList {
         long startTime = System.currentTimeMillis();
         int element;
         Random randGen = new Random();
-        for (int i = 0; i < RANDOM_ELEMENTS; i++) {
+        for (int i = 0; i < RANDOM_OPS; i++) {
             element = randGen.nextInt((int)LIST_ELEMENTS);
             list.indexOf(element);
         }
@@ -140,7 +125,9 @@ public class TestList {
     private static void printStats(String intro, long[] times) {
         Arrays.sort(times);
         int n = times.length;
-        System.out.printf("%s: %d/%d/%d ms\n", intro, times[0], median(times), times[n-1]);
+        System.out.printf("%s: ", intro);
+        System.out.println(Arrays.toString(times));
+        //System.out.printf("%s: %d/%d/%d ms\n", intro, times[0], median(times), times[n-1]);
     }
 
     private static long median(long[] times) {
