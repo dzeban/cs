@@ -7,23 +7,28 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class App {
-    private static final int LIST_ELEMENTS = 10_000;
-    private static final int RANDOM_OPS = 100;
-
     public static void main(String[] args) {
-        System.out.printf("Testing with %d elements, %d random ops\n", LIST_ELEMENTS, RANDOM_OPS);
+        if (args.length != 3) {
+            System.out.println("Usage: App <list size> <random ops> <test runs>");
+            System.exit(1);
+        }
+
+        int listSize = Integer.parseInt(args[0]);
+        int randomOps = Integer.parseInt(args[1]);
+        int testRuns = Integer.parseInt(args[2]);
+
         System.out.println("Testing LinkedList");
         LinkedList<Integer> linkedList = new LinkedList<>();
-        testList(linkedList, 10);
+        testList(linkedList, testRuns, listSize, randomOps);
         linkedList.clear();
-        System.out.println("------------------\n");
+        System.out.println("\n------------------\n");
 
         System.out.println("Testing ArrayList");
         ArrayList<Integer> arrayList = new ArrayList<>();
-        testList(arrayList, 10);
+        testList(arrayList, testRuns, listSize, randomOps);
     }
 
-    private static void testList(List<Integer> list, int testRuns) {
+    private static void testList(List<Integer> list, int testRuns, int listSize, int randomOps) {
         long[] allocTimes, insertTimes, insertHeadTimes, insertTailTimes, searchTimes, deleteTimes;
         allocTimes = new long[testRuns];
         insertTimes = new long[testRuns];
@@ -32,11 +37,11 @@ public class App {
         searchTimes = new long[testRuns];
         deleteTimes = new long[testRuns];
 
-        TestAlloc testAlloc = new TestAlloc(list, LIST_ELEMENTS);
-        TestInsert testInsert = new TestInsert(list, RANDOM_OPS);
-        TestInsertHead testInsertHead = new TestInsertHead(list, RANDOM_OPS);
-        TestInsertTail testInsertTail = new TestInsertTail(list, RANDOM_OPS);
-        TestSearch testSearch = new TestSearch(list, RANDOM_OPS);
+        TestAlloc testAlloc = new TestAlloc(list, listSize);
+        TestInsert testInsert = new TestInsert(list, randomOps);
+        TestInsertHead testInsertHead = new TestInsertHead(list, randomOps);
+        TestInsertTail testInsertTail = new TestInsertTail(list, randomOps);
+        TestSearch testSearch = new TestSearch(list, randomOps);
         TestDelete testDelete = new TestDelete(list);
 
         for (int i = 0; i < testRuns; i++) {
