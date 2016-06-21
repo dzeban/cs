@@ -18,8 +18,8 @@ public class TestInsert implements Runnable {
         int listSize = list.size();
         Random randGen = new Random();
         for (int i = 0; i < randomOps; i++) {
-            index = randGen.nextInt((int)listSize);
-            element = randGen.nextInt((int)listSize);
+            index = randGen.nextInt(listSize);
+            element = randGen.nextInt(listSize);
             list.add(index, element);
         }
     }
