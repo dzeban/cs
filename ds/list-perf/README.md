@@ -8,7 +8,7 @@ Tests:
 3. Searching for a 10 000 random elements.
 4. Deleting 10 000 random elememnts.
 
-
+```
     $ time java -cp target/TestList-1.0-SNAPSHOT.jar com.dzyoba.alex.TestList
     Testing LinkedList
     Allocation: 7/22/442 ms
@@ -30,3 +30,4 @@ Tests:
     real	10m31.750s
     user	10m36.737s
     sys	0m1.011s
+```
